@@ -50,7 +50,7 @@ WHERE email = 'elena.kuznetsova@newmail.com';
 
 SELECT * FROM Students;
 
-SELECT course_name, credit FROM Courses;
+SELECT course_name, credits FROM Courses;
 
 SELECT * FROM students WHERE start_year = 2021;
 
