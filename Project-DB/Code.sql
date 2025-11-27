@@ -46,3 +46,24 @@ WHERE student_id = 3 and course_id = 1;
 
 DELETE FROM Students
 WHERE email = 'elena.kuznetsova@newmail.com';
+
+
+SELECT * FROM Students;
+
+SELECT course_name, credit FROM Courses;
+
+SELECT * FROM students WHERE start_year = 2021;
+
+SELECT * FROM courses WHERE credits > 4;
+
+SELECT * FROM students WHERE email = 'elena.kuznetsova.com';
+
+SELECT * FROM students WHERE full_name LIKE 'Дмитрий%';
+
+SELECT * FROM enrollments WHERE grade IS NULL;
+
+SELECT * FROM courses ORDER BY course_name;
+
+SELECT * FROM students ORDER BY start_year, full_name ASC;
+
+SELECT * FROM students ORDER BY start_year DESC LIMIT 2;
