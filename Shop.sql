@@ -81,51 +81,68 @@ WHERE order_id is null;
 
 SELECT
     p.product_name,
-    o.quantity,
-    o.price_per_unit
-FROM order_items c 
-FROM 
-RIGHT JOIN Orders o ON o.order_id = o.order_id
-where order_id = 1;
+    oi.quantity,
+    oi.price_per_unit
+FROM Order_items oi 
+JOIN Products p ON oi.order_id = p.product_id
+where oi.order_id = 1;
 
+SELECT full_name
+FROM Customers
+WHERE customer_id IN (
+    SELECT o.customer_id
+    FROM Orders o
+    JOIN Order_Items oi ON o.order_id = oi.order_id
+    JOIN Products p ON oi.product_id = p.product_id
+    WHERE p.product_name = 'Смартфон'
+);
 
-Задание 3: Состав конкретного заказа (Multi-JOIN)
-Напишите запрос для вывода всех позиций заказа с 
-`order_id = 1`. Результат должен включать название товара 
-(`product_name`), количество (`quantity`) и цену за единицу 
-(`price_per_unit`).
+SELECT product_name, price
+FROM Products
+WHERE price > (SELECT AVG(price) FROM Products);
 
-Задание 4: Покупатели определенного товара (Подзапрос с IN)
-С помощью подзапроса найдите имена всех покупателей, которые заказывали 'Смартфон'.
+SELECT order_id, order_date
+FROM Orders o
+WHERE EXISTS (
+    SELECT 1
+    FROM Order_Items oi
+    JOIN Products p ON oi.product_id = p.product_id
+    WHERE oi.order_id = o.order_id AND p.price > 100000
+);
 
-Задание 5: Дорогие товары (Скалярный подзапрос)
-Напишите запрос, который находит все товары, цена которых выше средней цены всех товаров в магазине.
+SELECT c.full_name
+FROM Customers c
+LEFT JOIN Orders o ON c.customer_id = o.customer_id
+LEFT JOIN Order_Items oi ON o.order_id = oi.order_id
+LEFT JOIN Products p ON oi.product_id = p.product_id AND p.product_name = 'Ноутбук'
+WHERE p.product_id IS NULL;
 
-Задание 6: Заказы с дорогими товарами (Коррелирующий подзапрос c EXISTS)
-Используя коррелирующий подзапрос с оператором `EXISTS`, найдите все заказы (`order_id`, `order_date`), которые содержат хотя бы один товар дороже 100 000.
+SELECT p.product_name
+FROM Products p
+LEFT JOIN Order_Items oi ON p.product_id = oi.product_id
+WHERE oi.order_item_id IS NULL;
 
-Задание 7 (со звездочкой): Сравнение подходов
-Найдите всех покупателей, которые НЕ заказывали 'Ноутбук'. Решите эту задачу двумя способами:
+SELECT
+    c.full_name,
+    p.product_name,
+    oi.quantity
+FROM Customers c
+FULL OUTER JOIN Orders o ON c.customer_id = o.customer_id
+FULL OUTER JOIN Order_Items oi ON o.order_id = oi.order_id
+FULL OUTER JOIN Products p ON oi.product_id = p.product_id;
 
-Используя `LEFT JOIN`.
-Используя подзапрос с `NOT IN`.
-Задание 8: Товары, которые еще никто не заказывал (RIGHT JOIN или LEFT JOIN с IS NULL)
-Найдите все товары, которые еще ни разу не были заказаны. Выведите их названия. Решите задачу, используя `RIGHT JOIN` (или `LEFT JOIN` с соответствующим условием).
+SELECT c.full_name
+FROM Customers c
+JOIN Orders o ON c.customer_id = o.customer_id
+JOIN Order_Items oi ON o.order_id = oi.order_id
+WHERE oi.price_per_unit = (SELECT MAX(price) FROM Products);
 
-Задание 9: Полный список активности (FULL OUTER JOIN)
-Выведите полный список всех покупателей, всех товаров и все их заказы. Включите покупателей, которые не делали заказов, и товары, которые не были заказаны. Для записей без совпадений должны быть `NULL` значения. Выведите имя покупателя, название товара и количество.
+SELECT c.full_name, p.category
+from customers c
+CROSS JOIN products p;
 
-Задание 10: Покупатели, купившие самый дорогой товар (JOIN vs Подзапрос)
-Найдите имена покупателей, которые купили самый дорогой товар. Решите задачу двумя способами:
-
-Используя `JOIN` с подзапросом.
-Используя только подзапросы (без явного `JOIN` в основном запросе, если возможно).
-Задание 11: Все возможные пары "покупатель-категория" (CROSS JOIN)
-Напишите запрос, который выведет все возможные комбинации имен покупателей и категорий товаров. Это может быть полезно для создания отчета, где нужно показать все возможные варианты, даже если покупок в данной категории не было.
-
-Задание 12: Кто кого порекомендовал (SELF JOIN)
-Используя `SELF JOIN` на таблице `Customers`,
- выведите список покупателей и тех, 
-кто их порекомендовал. Результат должен содержать два
- столбца: `new_customer` (имя нового покупателя) и `recommended_by` 
- (имя того, кто его порекомендовал).
+SELECT
+    customer.full_name AS new_customer,
+    recommender.full_name AS recommended_by
+FROM Customers customer
+LEFT JOIN Customers recommender ON customer.recommended_by = recommender.customer_id;
