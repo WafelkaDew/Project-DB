@@ -66,83 +66,47 @@ INSERT INTO Order_Items (order_id, product_id, quantity, price_per_unit) VALUES
 (4, 5, 1, 4500.00);   -- и Фен
 
 
-SELECT
+SELECT category, COUNT(*)
+FROM Products  
+GROUP BY category;
+
+SELECT SUM(quantity * price_per_unit) AS total_revenue
+FROM Order_Items;
+
+SELECT 
     c.full_name,
-    o.order_date
-FROM Customers c
-JOIN Orders o ON c.customer_id = o.customer_id;
-
-
-SELECT
-    c.full_name
+    COUNT(o.order_id) AS orders_count
 FROM Customers c
 LEFT JOIN Orders o ON c.customer_id = o.customer_id
-WHERE order_id is null;
+GROUP BY c.customer_id, c.full_name;
+
+SELECT AVG(quantity * price_per_unit) AS avg_order_price
+FROM Order_Items;
 
 SELECT
-    p.product_name,
-    oi.quantity,
-    oi.price_per_unit
-FROM Order_items oi 
-JOIN Products p ON oi.order_id = p.product_id
-where oi.order_id = 1;
-
-SELECT full_name
-FROM Customers
-WHERE customer_id IN (
-    SELECT o.customer_id
-    FROM Orders o
-    JOIN Order_Items oi ON o.order_id = oi.order_id
-    JOIN Products p ON oi.product_id = p.product_id
-    WHERE p.product_name = 'Смартфон'
-);
-
-SELECT product_name, price
-FROM Products
-WHERE price > (SELECT AVG(price) FROM Products);
-
-SELECT order_id, order_date
+    o.status,
+    COUNT(o.order_id)
 FROM Orders o
-WHERE EXISTS (
-    SELECT 1
-    FROM Order_Items oi
-    JOIN Products p ON oi.product_id = p.product_id
-    WHERE oi.order_id = o.order_id AND p.price > 100000
-);
+GROUP BY o.status;
 
-SELECT c.full_name
-FROM Customers c
-LEFT JOIN Orders o ON c.customer_id = o.customer_id
-LEFT JOIN Order_Items oi ON o.order_id = oi.order_id
-LEFT JOIN Products p ON oi.product_id = p.product_id AND p.product_name = 'Ноутбук'
-WHERE p.product_id IS NULL;
+SELECT category, COUNT(*)
+FROM Products  
+GROUP BY category
+HAVING COUNT(category) > 1;
 
-SELECT p.product_name
-FROM Products p
-LEFT JOIN Order_Items oi ON p.product_id = oi.product_id
-WHERE oi.order_item_id IS NULL;
-
-SELECT
+SELECT 
     c.full_name,
+    COUNT(o.customer_id)
+FROM Customers c
+JOIN Orders o ON o.customer_id = c.customer_id
+GROUP BY c.full_name
+HAVING COUNT(o.customer_id) > 1;
+
+SELECT 
     p.product_name,
-    oi.quantity
-FROM Customers c
-FULL OUTER JOIN Orders o ON c.customer_id = o.customer_id
-FULL OUTER JOIN Order_Items oi ON o.order_id = oi.order_id
-FULL OUTER JOIN Products p ON oi.product_id = p.product_id;
-
-SELECT c.full_name
-FROM Customers c
-JOIN Orders o ON c.customer_id = o.customer_id
-JOIN Order_Items oi ON o.order_id = oi.order_id
-WHERE oi.price_per_unit = (SELECT MAX(price) FROM Products);
-
-SELECT c.full_name, p.category
-from customers c
-CROSS JOIN products p;
-
-SELECT
-    customer.full_name AS new_customer,
-    recommender.full_name AS recommended_by
-FROM Customers customer
-LEFT JOIN Customers recommender ON customer.recommended_by = recommender.customer_id;
+    SUM(oi.quantity) AS total_units_sold
+FROM Products p
+JOIN Order_Items oi ON p.product_id = oi.product_id
+GROUP BY p.product_id, p.product_name
+ORDER BY total_units_sold DESC
+LIMIT 1;
